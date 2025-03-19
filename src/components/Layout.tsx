@@ -95,6 +95,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Button 
                 variant="outline" 
                 size="sm"
+                className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary"
                 onClick={() => navigate('/login')}
               >
                 <LogIn className="mr-2 h-4 w-4" />

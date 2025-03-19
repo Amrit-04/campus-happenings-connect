@@ -36,7 +36,7 @@ const HomePage = () => {
           <Button 
             size="lg" 
             variant="outline" 
-            className="font-semibold text-white border-white hover:bg-white hover:text-primary"
+            className="font-semibold text-primary-foreground border-white hover:bg-white hover:text-primary"
             onClick={() => navigate('/events')}
           >
             Browse All Events
