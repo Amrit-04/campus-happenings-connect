@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Event, EventCategory } from '@/types/Event';
-import { createEvent, getEventById, updateEvent } from '@/services/mockData';
+import { addEvent, getEventById, updateEvent } from '@/services/mockData';
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -137,7 +137,7 @@ const EventForm = () => {
         });
       } else {
         // Create new event
-        createEvent(eventData);
+        addEvent(eventData);
         toast({
           title: "Event created successfully!",
         });
