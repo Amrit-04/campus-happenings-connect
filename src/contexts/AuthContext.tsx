@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -116,6 +115,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: "There was a problem with Google authentication. Please check your Supabase configuration.",
           variant: "destructive",
         });
+      } else {
+        // Let the user know they're being redirected
+        toast({
+          title: "Redirecting to Google...",
+          description: "You will be redirected to Google for authentication.",
+        });
+        
+        // Add a small delay before redirecting to ensure toast is shown
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 1000);
       }
     } catch (error: any) {
       toast({
@@ -155,6 +165,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: "There was a problem with GitHub authentication. Please check your Supabase configuration.",
           variant: "destructive",
         });
+      } else {
+        // Let the user know they're being redirected
+        toast({
+          title: "Redirecting to GitHub...",
+          description: "You will be redirected to GitHub for authentication.",
+        });
+        
+        // Add a small delay before redirecting to ensure toast is shown
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 1000);
       }
     } catch (error: any) {
       toast({
