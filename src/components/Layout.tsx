@@ -12,7 +12,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, profile, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -81,7 +81,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {user ? (
               <div className="flex items-center gap-2">
                 <span className="hidden md:inline text-sm font-medium">
-                  {user.name} ({user.role})
+                  {profile?.full_name || user.email} ({profile?.role || 'user'})
                 </span>
                 <Button 
                   variant="ghost" 
