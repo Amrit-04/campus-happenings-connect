@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,12 +43,12 @@ type FormValues = z.infer<typeof formSchema>;
 
 const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, onSuccess }) => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: user?.name || '',
+      name: profile?.full_name || '',
       email: user?.email || '',
       studentId: '',
       department: '',
@@ -67,7 +66,6 @@ const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, on
       return;
     }
     
-    // Check if registration is already done
     if (isUserRegistered(user.id, event.id)) {
       toast({
         title: "Already registered",
@@ -77,7 +75,6 @@ const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, on
       return;
     }
     
-    // Check if event is full
     if (event.maxAttendees && event.currentAttendees >= event.maxAttendees) {
       toast({
         title: "Event is full",
@@ -87,7 +84,6 @@ const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, on
       return;
     }
     
-    // Check if registration deadline has passed
     if (event.registrationDeadline && new Date(event.registrationDeadline) < new Date()) {
       toast({
         title: "Registration closed",
@@ -97,7 +93,6 @@ const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, on
       return;
     }
     
-    // Process registration
     try {
       registerForEvent(event.id, user.id, {
         name: data.name,
