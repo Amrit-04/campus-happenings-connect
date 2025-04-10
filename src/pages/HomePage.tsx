@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Bell, ArrowRight } from 'lucide-react';
+import { Calendar, Bell, ArrowRight, UsersRound, BookOpen } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
 import EventCard from '@/components/EventCard';
 import AnnouncementCard from '@/components/AnnouncementCard';
 import { 
@@ -14,9 +15,11 @@ import {
   getUpcomingEvents, 
   getAllAnnouncements 
 } from '@/services/mockData';
+import { useAuth } from '@/contexts/AuthContext';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('featured');
   
   const featuredEvents = getFeaturedEvents();
@@ -27,111 +30,160 @@ const HomePage = () => {
   return (
     <Layout>
       {/* Hero section */}
-      <section className="py-10 mb-6 bg-gradient-to-r from-primary to-secondary rounded-lg text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">Welcome to CampusConnect</h1>
-          <p className="text-xl max-w-2xl mx-auto mb-6">
-            Stay connected with all the events happening around your campus
+      <section className="py-24 md:py-32 relative overflow-hidden">
+        <div className="container mx-auto px-4 text-center z-10 relative">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 logo-gradient animate-fade">
+            Campus Connect
+          </h1>
+          <p className="text-xl md:text-2xl max-w-2xl mx-auto mb-10 text-foreground/90 animate-fade">
+            Your gateway to campus events, clubs, and opportunities
           </p>
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="font-semibold text-[rgb(68,45,82)] border-white hover:bg-white hover:text-[#ea384c]"
-            onClick={() => navigate('/events')}
-          >
-            Browse All Events
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="btn-gradient animate-fade"
+              onClick={() => navigate('/events')}
+            >
+              Get Started
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-primary text-foreground hover:text-secondary animate-fade"
+              onClick={() => user ? navigate('/dashboard') : navigate('/login')}
+            >
+              Log In
+            </Button>
+          </div>
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Events section (2/3 width on large screens) */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold flex items-center">
-              <Calendar className="mr-2 h-5 w-5" />
-              Campus Events
-            </h2>
-            <Button variant="ghost" onClick={() => navigate('/events')}>
-              View All
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+      {/* Features section */}
+      <section className="py-16 bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="space-card">
+              <CardContent className="p-6 text-center">
+                <h2 className="text-2xl font-semibold mb-4">Discover Events</h2>
+                <Calendar className="h-12 w-12 mx-auto mb-4 text-primary" />
+                <p className="text-foreground/80">
+                  Find and join campus events that match your interests and schedule.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="space-card">
+              <CardContent className="p-6 text-center">
+                <h2 className="text-2xl font-semibold mb-4">Connect with Peers</h2>
+                <UsersRound className="h-12 w-12 mx-auto mb-4 text-primary" />
+                <p className="text-foreground/80">
+                  Meet like-minded students and build your campus network.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="space-card">
+              <CardContent className="p-6 text-center">
+                <h2 className="text-2xl font-semibold mb-4">Grow Your Skills</h2>
+                <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary" />
+                <p className="text-foreground/80">
+                  Participate in workshops and activities that enhance your education.
+                </p>
+              </CardContent>
+            </Card>
           </div>
-          
-          <Tabs defaultValue="featured" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="featured">Featured</TabsTrigger>
-              <TabsTrigger value="current">Happening Now</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="featured" className="mt-4">
-              {featuredEvents.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {featuredEvents.map(event => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  No featured events at the moment.
-                </p>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="current" className="mt-4">
-              {currentEvents.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {currentEvents.map(event => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  No events happening right now.
-                </p>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="upcoming" className="mt-4">
-              {upcomingEvents.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {upcomingEvents.map(event => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  No upcoming events at the moment.
-                </p>
-              )}
-            </TabsContent>
-          </Tabs>
         </div>
-        
-        {/* Announcements section (1/3 width on large screens) */}
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold flex items-center">
-              <Bell className="mr-2 h-5 w-5" />
-              Announcements
-            </h2>
+      </section>
+
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Events section (2/3 width on large screens) */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold flex items-center">
+                <Calendar className="mr-2 h-5 w-5" />
+                Campus Events
+              </h2>
+              <Button variant="ghost" onClick={() => navigate('/events')}>
+                View All
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+            
+            <Tabs defaultValue="featured" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="featured">Featured</TabsTrigger>
+                <TabsTrigger value="current">Happening Now</TabsTrigger>
+                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="featured" className="mt-4">
+                {featuredEvents.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {featuredEvents.map(event => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    No featured events at the moment.
+                  </p>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="current" className="mt-4">
+                {currentEvents.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {currentEvents.map(event => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    No events happening right now.
+                  </p>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="upcoming" className="mt-4">
+                {upcomingEvents.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {upcomingEvents.map(event => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    No upcoming events at the moment.
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
           
-          <div className="space-y-4">
-            {announcements.length > 0 ? (
-              announcements.map(announcement => (
-                <AnnouncementCard
-                  key={announcement.id}
-                  announcement={announcement}
-                />
-              ))
-            ) : (
-              <p className="text-muted-foreground text-center py-8">
-                No announcements at the moment.
-              </p>
-            )}
+          {/* Announcements section (1/3 width on large screens) */}
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold flex items-center">
+                <Bell className="mr-2 h-5 w-5" />
+                Announcements
+              </h2>
+            </div>
+            
+            <div className="space-y-4">
+              {announcements.length > 0 ? (
+                announcements.map(announcement => (
+                  <AnnouncementCard
+                    key={announcement.id}
+                    announcement={announcement}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-8">
+                  No announcements at the moment.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

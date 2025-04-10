@@ -39,22 +39,46 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/');
   };
 
+  // Generate random particles for the background
+  const particles = Array.from({ length: 15 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    size: Math.random() * 5 + 2,
+    type: i % 3 === 0 ? 'particle-purple' : i % 3 === 1 ? 'particle-blue' : 'particle-white',
+    animation: i % 3 === 0 ? 'animate-float-1' : i % 3 === 1 ? 'animate-float-2' : 'animate-float-3'
+  }));
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Background particles */}
+      {particles.map((particle) => (
+        <div
+          key={particle.id}
+          className={`particle ${particle.type} ${particle.animation}`}
+          style={{
+            left: particle.left,
+            top: particle.top,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`
+          }}
+        />
+      ))}
+
       {/* Header */}
-      <header className="purple-gradient text-white shadow-md">
+      <header className="bg-background border-b border-border/30 z-10">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Sheet>
               <SheetTrigger asChild className="lg:hidden">
-                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                <Button variant="ghost" size="icon" className="text-foreground hover:bg-muted">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 bg-white/95 backdrop-blur-md">
+              <SheetContent side="left" className="w-64 bg-card border-r border-border">
                 <div className="flex flex-col h-full">
-                  <div className="py-4 border-b">
-                    <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  <div className="py-4 border-b border-border">
+                    <h2 className="text-xl font-bold logo-gradient">
                       Campus Connect
                     </h2>
                   </div>
@@ -90,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </nav>
                   
                   {user && (
-                    <div className="mt-auto border-t pt-4">
+                    <div className="mt-auto border-t border-border pt-4">
                       <Button 
                         variant="ghost" 
                         className="w-full justify-start text-destructive"
@@ -104,7 +128,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </SheetContent>
             </Sheet>
             <h1 
-              className="text-xl font-bold cursor-pointer text-white" 
+              className="text-xl font-bold cursor-pointer logo-gradient" 
               onClick={() => navigate('/')}
             >
               Campus Connect
@@ -117,8 +141,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 key={item.path}
                 variant="ghost"
                 className={cn(
-                  "text-white hover:text-white hover:bg-white/20", 
-                  isActive(item.path) && "font-bold border-b-2 border-white rounded-none"
+                  "text-foreground hover:text-white hover:bg-muted", 
+                  isActive(item.path) && "font-bold border-b-2 border-secondary rounded-none"
                 )}
                 onClick={() => navigate(item.path)}
               >
@@ -130,8 +154,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Button
                 variant="ghost"
                 className={cn(
-                  "text-white hover:text-white hover:bg-white/20", 
-                  location.pathname.startsWith('/admin') && "font-bold border-b-2 border-white rounded-none"
+                  "text-foreground hover:text-white hover:bg-muted", 
+                  location.pathname.startsWith('/admin') && "font-bold border-b-2 border-secondary rounded-none"
                 )}
                 onClick={() => navigate('/admin')}
               >
@@ -141,8 +165,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+            <Button variant="ghost" size="icon" className="text-foreground hover:bg-muted relative">
               <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full"></span>
             </Button>
             
             {user ? (
@@ -150,9 +175,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost" 
-                    className="rounded-full bg-white/20 text-white hover:bg-white/30 h-10 px-4 flex items-center gap-2"
+                    className="rounded-full bg-muted text-foreground hover:bg-muted/60 h-10 px-4 flex items-center gap-2"
                   >
-                    <div className="h-6 w-6 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                    <div className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center">
                       <span className="text-xs font-bold">
                         {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : user.email?.substring(0, 2).toUpperCase() || "U"}
                       </span>
@@ -179,7 +204,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Button 
                 variant="secondary"
                 size="sm"
-                className="bg-white text-primary hover:bg-white/90"
                 onClick={() => navigate('/login')}
               >
                 Log In
@@ -195,28 +219,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
       
       {/* Footer */}
-      <footer className="bg-slate-900 text-white py-8">
+      <footer className="bg-card/50 text-foreground py-8 border-t border-border/30 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Campus Connect</h3>
-              <p className="text-slate-300">Your gateway to campus events and opportunities.</p>
+              <h3 className="text-lg font-semibold mb-4 logo-gradient">Campus Connect</h3>
+              <p className="text-muted-foreground">Your gateway to campus events and opportunities.</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                <li><button onClick={() => navigate('/')} className="text-slate-300 hover:text-white">Home</button></li>
-                <li><button onClick={() => navigate('/events')} className="text-slate-300 hover:text-white">Events</button></li>
-                <li><button onClick={() => navigate('/about')} className="text-slate-300 hover:text-white">About</button></li>
+                <li><button onClick={() => navigate('/')} className="text-muted-foreground hover:text-foreground">Home</button></li>
+                <li><button onClick={() => navigate('/events')} className="text-muted-foreground hover:text-foreground">Events</button></li>
+                <li><button onClick={() => navigate('/about')} className="text-muted-foreground hover:text-foreground">About</button></li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Contact</h3>
-              <p className="text-slate-300">support@campusconnect.edu</p>
-              <p className="text-slate-300">123-456-7890</p>
+              <p className="text-muted-foreground">support@campusconnect.edu</p>
+              <p className="text-muted-foreground">123-456-7890</p>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
             <p>© {new Date().getFullYear()} Campus Connect. All rights reserved.</p>
           </div>
         </div>

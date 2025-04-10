@@ -97,19 +97,21 @@ const EventsPage = () => {
   
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="container mx-auto px-4 py-16 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold flex items-center">
+          <h1 className="text-3xl font-bold flex items-center logo-gradient">
             <Calendar className="mr-2 h-6 w-6" />
             Campus Events
           </h1>
         </div>
         
-        <EventSearchFilter
-          onSearch={handleSearch}
-          onFilter={applyFilters}
-          onSort={handleSort}
-        />
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl p-4 border border-border">
+          <EventSearchFilter
+            onSearch={handleSearch}
+            onFilter={applyFilters}
+            onSort={handleSort}
+          />
+        </div>
         
         {events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -118,7 +120,7 @@ const EventsPage = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-12 space-card p-8">
             <p className="text-xl font-medium">No events found</p>
             <p className="text-muted-foreground">
               Try adjusting your search or filter criteria
