@@ -19,7 +19,14 @@ import ManageEventsPage from "./pages/admin/ManageEventsPage";
 import EventForm from "./pages/admin/EventForm";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
