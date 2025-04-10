@@ -12,6 +12,8 @@ import EventsPage from "./pages/EventsPage";
 import EventDetailsPage from "./pages/EventDetailsPage";
 import LoginPage from "./pages/LoginPage";
 import MyRegistrationsPage from "./pages/MyRegistrationsPage";
+import DashboardPage from "./pages/DashboardPage";
+import AboutPage from "./pages/AboutPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageEventsPage from "./pages/admin/ManageEventsPage";
 import EventForm from "./pages/admin/EventForm";
@@ -32,9 +34,11 @@ const App = () => (
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:id" element={<EventDetailsPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/about" element={<AboutPage />} />
             
             {/* Student Routes */}
             <Route path="/my-registrations" element={<MyRegistrationsPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />

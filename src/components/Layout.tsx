@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, Calendar, Home, LogIn, LogOut, Menu, User, Users } from 'lucide-react';
+import { Bell, Calendar, Home, LogIn, LogOut, Menu, User, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -21,20 +21,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigationItems = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'Events', path: '/events', icon: Calendar },
+    { name: 'About', path: '/about', icon: User },
   ];
 
   if (user) {
-    if (isAdmin()) {
-      navigationItems.push({ name: 'Admin Dashboard', path: '/admin', icon: Users });
-    } else {
-      navigationItems.push({ name: 'My Registrations', path: '/my-registrations', icon: User });
-    }
+    navigationItems.push({ name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard });
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-md">
+      <header className="bg-black text-white shadow-md">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Sheet>
@@ -59,8 +56,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </nav>
               </SheetContent>
             </Sheet>
-            <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>
-              CampusConnect
+            <h1 
+              className="text-xl font-bold cursor-pointer bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent" 
+              onClick={() => navigate('/')}
+            >
+              Campus Connect
             </h1>
           </div>
           
@@ -68,38 +68,44 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {navigationItems.map((item) => (
               <Button
                 key={item.path}
-                variant={isActive(item.path) ? "secondary" : "ghost"}
+                variant="ghost"
+                className={cn(
+                  "text-white hover:text-white hover:bg-transparent hover:opacity-80", 
+                  isActive(item.path) && "font-bold underline underline-offset-4"
+                )}
                 onClick={() => navigate(item.path)}
               >
-                <item.icon className="mr-2 h-5 w-5" />
                 {item.name}
               </Button>
             ))}
           </div>
           
           <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" className="text-white">
+              <Bell className="h-5 w-5" />
+            </Button>
+            
             {user ? (
               <div className="flex items-center gap-2">
-                <span className="hidden md:inline text-sm font-medium">
-                  {profile?.full_name || user.email} ({profile?.role || 'user'})
-                </span>
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  onClick={logout}
+                  className="rounded-full bg-indigo-600 text-white h-10 w-10 flex items-center justify-center"
+                  onClick={() => navigate('/profile')}
                 >
-                  <LogOut className="h-5 w-5" />
+                  <span className="text-sm font-bold">
+                    {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : user.email?.substring(0, 2).toUpperCase() || "DU"}
+                  </span>
                 </Button>
               </div>
             ) : (
               <Button 
                 variant="outline" 
                 size="sm"
-                className="text-[rgb(68,45,82)] border-primary-foreground hover:bg-primary-foreground hover:text-[#ea384c]"
+                className="text-white border-white hover:bg-white hover:text-black"
                 onClick={() => navigate('/login')}
               >
-                <LogIn className="mr-2 h-4 w-4" />
-                Login
+                Log In
               </Button>
             )}
           </div>
@@ -107,17 +113,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
       
       {/* Main content */}
-      <main className="flex-grow container mx-auto px-4 py-6">
+      <main className="flex-grow">
         {children}
       </main>
-      
-      {/* Footer */}
-      <footer className="bg-muted py-6">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} CampusConnect. All rights reserved.</p>
-          <p className="text-sm mt-2">A platform for college students to stay connected with campus events.</p>
-        </div>
-      </footer>
     </div>
   );
 };
