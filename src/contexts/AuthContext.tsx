@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,8 +16,6 @@ type AuthContextType = {
   profile: Profile | null;
   session: Session | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signInWithGitHub: () => Promise<void>;
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -85,106 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    try {
-      const { error, data } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        }
-      });
-      
-      if (error) {
-        console.error("Google sign in error:", error);
-        toast({
-          title: "Google Sign In Failed",
-          description: error.message || "Unable to sign in with Google. Please try again.",
-          variant: "destructive",
-        });
-        throw error;
-      }
-      
-      // If no redirected session, show a message
-      if (!data.url) {
-        toast({
-          title: "Authentication Error",
-          description: "There was a problem with Google authentication. Please check your Supabase configuration.",
-          variant: "destructive",
-        });
-      } else {
-        // Let the user know they're being redirected
-        toast({
-          title: "Redirecting to Google...",
-          description: "You will be redirected to Google for authentication.",
-        });
-        
-        // Add a small delay before redirecting to ensure toast is shown
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 1000);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Authentication Error",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signInWithGitHub = async () => {
-    setLoading(true);
-    try {
-      const { error, data } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        }
-      });
-      
-      if (error) {
-        console.error("GitHub sign in error:", error);
-        toast({
-          title: "GitHub Sign In Failed",
-          description: error.message || "Unable to sign in with GitHub. Please try again.",
-          variant: "destructive",
-        });
-        throw error;
-      }
-      
-      // If no redirected session, show a message
-      if (!data.url) {
-        toast({
-          title: "Authentication Error",
-          description: "There was a problem with GitHub authentication. Please check your Supabase configuration.",
-          variant: "destructive",
-        });
-      } else {
-        // Let the user know they're being redirected
-        toast({
-          title: "Redirecting to GitHub...",
-          description: "You will be redirected to GitHub for authentication.",
-        });
-        
-        // Add a small delay before redirecting to ensure toast is shown
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 1000);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Authentication Error",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -280,8 +179,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     session,
     loading,
-    signInWithGoogle,
-    signInWithGitHub,
     signInWithPassword,
     signUp,
     logout,
