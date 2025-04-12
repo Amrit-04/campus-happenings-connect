@@ -8,7 +8,6 @@ type Profile = {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
-  role: "student" | "admin";
 };
 
 type AuthContextType = {
@@ -19,7 +18,6 @@ type AuthContextType = {
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  isAdmin: () => boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,12 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // For now, we'll assign student as default role
-      // In a real app, you would store and fetch actual roles
-      setProfile({
-        ...data,
-        role: "student" // Default role
-      });
+      setProfile(data);
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
     }
@@ -172,8 +165,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const isAdmin = () => profile?.role === "admin";
-
   const value = {
     user,
     profile,
@@ -182,7 +173,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithPassword,
     signUp,
     logout,
-    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

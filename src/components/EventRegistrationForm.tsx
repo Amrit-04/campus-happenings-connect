@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerForEvent, isUserRegistered } from '@/services/mockData';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EventRegistrationFormProps {
   event: Event;
@@ -56,7 +58,7 @@ const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, on
     },
   });
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -94,12 +96,35 @@ const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, on
     }
     
     try {
+      // First register in the mock data system (for UI purposes)
       registerForEvent(event.id, user.id, {
         name: data.name,
         email: data.email,
         studentId: data.studentId,
         department: data.department,
       });
+      
+      // Also save to the database through Supabase
+      const attendeeInfo = {
+        name: data.name,
+        email: data.email,
+        studentId: data.studentId,
+        department: data.department,
+        notes: data.notes || '',
+      };
+      
+      const { error } = await supabase
+        .from('event_registrations')
+        .insert({
+          user_id: user.id,
+          event_id: event.id,
+          attendee_info: attendeeInfo
+        });
+        
+      if (error) {
+        console.error("Error saving registration to database:", error);
+        throw new Error("Failed to save registration to database");
+      }
       
       toast({
         title: "Registration successful",
@@ -108,6 +133,7 @@ const EventRegistrationForm: React.FC<EventRegistrationFormProps> = ({ event, on
       
       onSuccess();
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: "There was an error processing your registration. Please try again.",

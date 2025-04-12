@@ -46,6 +46,33 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Announcements section - moved above features */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold flex items-center">
+              <Bell className="mr-2 h-5 w-5" />
+              Announcements
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {announcements.length > 0 ? (
+              announcements.map(announcement => (
+                <AnnouncementCard
+                  key={announcement.id}
+                  announcement={announcement}
+                />
+              ))
+            ) : (
+              <p className="text-muted-foreground text-center py-8 col-span-3">
+                No announcements at the moment.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Features section */}
       <section className="py-16 bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4">
@@ -82,33 +109,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
-      {/* Announcements section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold flex items-center">
-              <Bell className="mr-2 h-5 w-5" />
-              Announcements
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {announcements.length > 0 ? (
-              announcements.map(announcement => (
-                <AnnouncementCard
-                  key={announcement.id}
-                  announcement={announcement}
-                />
-              ))
-            ) : (
-              <p className="text-muted-foreground text-center py-8 col-span-3">
-                No announcements at the moment.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
     </Layout>
   );
 };

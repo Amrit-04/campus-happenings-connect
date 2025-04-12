@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useAuth } from './AuthContext';
 import { getAllEvents } from '@/services/mockData';
 import { Event } from '@/types/Event';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
   id: string;
@@ -30,6 +31,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Generate event reminder notifications
   useEffect(() => {
     if (user) {
+      // Get all upcoming events
       const events = getAllEvents();
       const upcomingEvents = events.filter(event => {
         const eventDate = new Date(event.date);
@@ -40,6 +42,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         return eventDate > now && eventDate <= threeDaysFromNow;
       });
       
+      // Generate reminder notifications for upcoming events
       const eventNotifications: Notification[] = upcomingEvents.map(event => ({
         id: `event-reminder-${event.id}`,
         title: 'Event Reminder',
@@ -50,17 +53,78 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         type: 'reminder'
       }));
       
-      // Add welcome notification for new users
-      const welcomeNotification: Notification = {
-        id: 'welcome',
-        title: 'Welcome to CampusConnect',
-        message: 'Thanks for joining our platform. Start exploring campus events!',
-        date: new Date(),
-        read: false,
-        type: 'system'
+      // Check for user registrations
+      const checkRegistrations = async () => {
+        try {
+          const { data: registrations, error } = await supabase
+            .from('event_registrations')
+            .select('event_id')
+            .eq('user_id', user.id);
+            
+          if (error) {
+            console.error("Error fetching user registrations:", error);
+            return;
+          }
+          
+          // Create registration notifications
+          if (registrations && registrations.length > 0) {
+            const registeredEventIds = registrations.map(reg => reg.event_id);
+            const registeredEvents = events.filter(event => 
+              registeredEventIds.includes(event.id)
+            );
+            
+            const registrationNotifications: Notification[] = registeredEvents.map(event => ({
+              id: `registration-${event.id}`,
+              title: 'Registration Confirmation',
+              message: `You are registered for ${event.title} on ${new Date(event.date).toLocaleDateString()}`,
+              date: new Date(),
+              read: false,
+              eventId: event.id,
+              type: 'event'
+            }));
+            
+            // Add welcome notification for new users
+            const welcomeNotification: Notification = {
+              id: 'welcome',
+              title: 'Welcome to CampusConnect',
+              message: 'Thanks for joining our platform. Start exploring campus events!',
+              date: new Date(),
+              read: false,
+              type: 'system'
+            };
+            
+            setNotifications([welcomeNotification, ...registrationNotifications, ...eventNotifications]);
+          } else {
+            // If no registrations, just use event reminders and welcome message
+            const welcomeNotification: Notification = {
+              id: 'welcome',
+              title: 'Welcome to CampusConnect',
+              message: 'Thanks for joining our platform. Start exploring campus events!',
+              date: new Date(),
+              read: false,
+              type: 'system'
+            };
+            
+            setNotifications([welcomeNotification, ...eventNotifications]);
+          }
+        } catch (err) {
+          console.error("Error in notification system:", err);
+          
+          // Fallback to just using event reminders
+          const welcomeNotification: Notification = {
+            id: 'welcome',
+            title: 'Welcome to CampusConnect',
+            message: 'Thanks for joining our platform. Start exploring campus events!',
+            date: new Date(),
+            read: false,
+            type: 'system'
+          };
+          
+          setNotifications([welcomeNotification, ...eventNotifications]);
+        }
       };
       
-      setNotifications([welcomeNotification, ...eventNotifications]);
+      checkRegistrations();
     } else {
       setNotifications([]);
     }

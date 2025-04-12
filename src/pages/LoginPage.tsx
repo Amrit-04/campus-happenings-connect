@@ -84,13 +84,7 @@ const LoginPage = () => {
     
     try {
       await signInWithPassword(values.email, values.password);
-      
-      toast({
-        title: "Login successful",
-        description: "You have been logged in successfully.",
-      });
-      
-      navigate('/');
+      // Success login - no toast message, just redirect in the useEffect
     } catch (error: any) {
       setLoginError("Login unsuccessful. Please check your credentials and try again.");
       
