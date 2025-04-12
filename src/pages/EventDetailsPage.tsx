@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -38,7 +37,7 @@ import { useToast } from '@/hooks/use-toast';
 const EventDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   
   const [event, setEvent] = useState<Event | null>(null);
@@ -209,16 +208,6 @@ const EventDetailsPage = () => {
             <Share2 className="mr-2 h-4 w-4" />
             Share
           </Button>
-          
-          {isAdmin() && (
-            <Button 
-              variant="outline" 
-              className="ml-auto"
-              onClick={() => navigate(`/admin/events/edit/${event.id}`)}
-            >
-              Edit Event
-            </Button>
-          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

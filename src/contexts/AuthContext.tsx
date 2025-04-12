@@ -18,6 +18,7 @@ type AuthContextType = {
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  isAdmin: () => boolean; // Added isAdmin function declaration
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -165,6 +166,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Add isAdmin function implementation
+  const isAdmin = () => {
+    // Since we want to remove admin functionality,
+    // we'll always return false for now
+    return false;
+  };
+
   const value = {
     user,
     profile,
@@ -173,6 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithPassword,
     signUp,
     logout,
+    isAdmin, // Added isAdmin to the context value
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
