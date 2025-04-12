@@ -18,9 +18,11 @@ import {
   getRegistrationsByUser,
   getEventById
 } from '@/services/mockData';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 const DashboardPage = () => {
   const { user, profile } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   
   React.useEffect(() => {
@@ -42,7 +44,7 @@ const DashboardPage = () => {
       return event;
     })
     .filter(event => event !== null)
-    .slice(0, 3);
+    .sort((a, b) => new Date(a!.date).getTime() - new Date(b!.date).getTime());
 
   if (!user) {
     return null;
@@ -78,13 +80,13 @@ const DashboardPage = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center">
                 <Bell className="h-4 w-4 mr-2 text-primary" />
-                Upcoming Events
+                Notifications
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{upcomingEvents.length}</div>
+              <div className="text-2xl font-bold">{unreadCount}</div>
               <p className="text-xs text-muted-foreground">
-                Events happening soon
+                Unread notifications
               </p>
             </CardContent>
           </Card>

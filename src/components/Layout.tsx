@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, Calendar, ChevronDown, Home, Menu, User, LayoutDashboard, BookOpen } from 'lucide-react';
+import { Calendar, ChevronDown, Home, Menu, User, LayoutDashboard, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -12,13 +12,14 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import NotificationDropdown from './NotificationDropdown';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, profile, logout, isAdmin } = useAuth();
+  const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -97,20 +98,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         {item.name}
                       </Button>
                     ))}
-                    
-                    {isAdmin && (
-                      <Button
-                        variant={location.pathname.startsWith('/admin') ? "secondary" : "ghost"}
-                        className={cn(
-                          "justify-start",
-                          location.pathname.startsWith('/admin') && "bg-secondary/20 font-medium"
-                        )}
-                        onClick={() => navigate('/admin')}
-                      >
-                        <LayoutDashboard className="mr-2 h-5 w-5" />
-                        Admin
-                      </Button>
-                    )}
                   </nav>
                   
                   {user && (
@@ -149,26 +136,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {item.name}
               </Button>
             ))}
-            
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "text-foreground hover:text-white hover:bg-muted", 
-                  location.pathname.startsWith('/admin') && "font-bold border-b-2 border-secondary rounded-none"
-                )}
-                onClick={() => navigate('/admin')}
-              >
-                Admin
-              </Button>
-            )}
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-foreground hover:bg-muted relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full"></span>
-            </Button>
+            {user && <NotificationDropdown />}
             
             {user ? (
               <DropdownMenu>
@@ -190,11 +161,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     Dashboard
                   </DropdownMenuItem>
-                  {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate('/admin')}>
-                      Admin Panel
-                    </DropdownMenuItem>
-                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     Log Out
                   </DropdownMenuItem>

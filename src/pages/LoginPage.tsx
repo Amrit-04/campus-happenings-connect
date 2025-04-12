@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -19,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const loginFormSchema = z.object({
   email: z.string().email({
@@ -53,9 +53,9 @@ const LoginPage = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [loginError, setLoginError] = useState<string | null>(null);
   
   useEffect(() => {
-    // If user is already logged in, redirect to home
     if (user) {
       navigate('/');
     }
@@ -80,6 +80,7 @@ const LoginPage = () => {
   
   const handleLoginSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
+    setLoginError(null);
     
     try {
       await signInWithPassword(values.email, values.password);
@@ -91,6 +92,8 @@ const LoginPage = () => {
       
       navigate('/');
     } catch (error: any) {
+      setLoginError("Login unsuccessful. Please check your credentials and try again.");
+      
       toast({
         title: "Login failed",
         description: error.message || "Invalid email or password.",
@@ -112,7 +115,6 @@ const LoginPage = () => {
         description: "Please check your email to verify your account.",
       });
       
-      // Switch to login tab after successful signup
       setActiveTab('login');
     } catch (error: any) {
       toast({
@@ -145,7 +147,10 @@ const LoginPage = () => {
         <CardContent>
           <Tabs 
             value={activeTab} 
-            onValueChange={(value) => setActiveTab(value as 'login' | 'signup')}
+            onValueChange={(value) => {
+              setActiveTab(value as 'login' | 'signup');
+              setLoginError(null);
+            }}
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -160,6 +165,14 @@ const LoginPage = () => {
             </TabsList>
             
             <TabsContent value="login">
+              {loginError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>
+                    {loginError}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
                   <FormField
