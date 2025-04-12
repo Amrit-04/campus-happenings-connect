@@ -18,7 +18,7 @@ type AuthContextType = {
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  isAdmin: () => boolean; // Added isAdmin function declaration
+  isAdmin: () => boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -166,11 +166,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Add isAdmin function implementation
+  // Implementation of isAdmin - for simplicity, we'll check if the email ends with '@admin.com'
+  // In a real application, you would check against a role in your user table
   const isAdmin = () => {
-    // Since we want to remove admin functionality,
-    // we'll always return false for now
-    return false;
+    if (!user || !user.email) return false;
+    return user.email.endsWith('@admin.com');
   };
 
   const value = {
@@ -181,7 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithPassword,
     signUp,
     logout,
-    isAdmin, // Added isAdmin to the context value
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

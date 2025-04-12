@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Calendar, ChevronDown, Home, Menu, User, LayoutDashboard, BookOpen } from 'lucide-react';
+import { Calendar, ChevronDown, Home, Menu, User, LayoutDashboard, BookOpen, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -16,7 +17,8 @@ const Layout: React.FC<LayoutProps> = ({
   const {
     user,
     profile,
-    logout
+    logout,
+    isAdmin
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -128,13 +130,31 @@ const Layout: React.FC<LayoutProps> = ({
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     Dashboard
                   </DropdownMenuItem>
+                  {isAdmin() && (
+                    <DropdownMenuItem onClick={() => navigate('/admin-events')}>
+                      Admin Dashboard
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     Log Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu> : <Button variant="secondary" size="sm" onClick={() => navigate('/login')}>
-                Log In
-              </Button>}
+              </DropdownMenu> : (
+                <div className="flex items-center gap-2">
+                  <Button variant="secondary" size="sm" onClick={() => navigate('/login')}>
+                    Log In
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/admin-login')}
+                    className="flex items-center gap-1 border-primary/50 hover:bg-primary/10"
+                  >
+                    <Shield className="h-3.5 w-3.5" />
+                    Admin
+                  </Button>
+                </div>
+              )}
           </div>
         </div>
       </header>
