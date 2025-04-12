@@ -1,47 +1,55 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, ChevronDown, Home, Menu, User, LayoutDashboard, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import NotificationDropdown from './NotificationDropdown';
-
 interface LayoutProps {
   children: React.ReactNode;
 }
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, profile, logout } = useAuth();
+const Layout: React.FC<LayoutProps> = ({
+  children
+}) => {
+  const {
+    user,
+    profile,
+    logout
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
   const isActive = (path: string) => location.pathname === path;
-
-  const navigationItems = [
-    { name: 'Home', path: '/', icon: Home },
-    { name: 'Events', path: '/events', icon: Calendar },
-    { name: 'About', path: '/about', icon: BookOpen },
-  ];
-
+  const navigationItems = [{
+    name: 'Home',
+    path: '/',
+    icon: Home
+  }, {
+    name: 'Events',
+    path: '/events',
+    icon: Calendar
+  }, {
+    name: 'About',
+    path: '/about',
+    icon: BookOpen
+  }];
   if (user) {
-    navigationItems.push({ name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard });
+    navigationItems.push({
+      name: 'Dashboard',
+      path: '/dashboard',
+      icon: LayoutDashboard
+    });
   }
-
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
   // Generate random particles for the background
-  const particles = Array.from({ length: 15 }, (_, i) => ({
+  const particles = Array.from({
+    length: 15
+  }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
     top: `${Math.random() * 100}%`,
@@ -49,22 +57,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     type: i % 3 === 0 ? 'particle-purple' : i % 3 === 1 ? 'particle-blue' : 'particle-white',
     animation: i % 3 === 0 ? 'animate-float-1' : i % 3 === 1 ? 'animate-float-2' : 'animate-float-3'
   }));
-
-  return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
+  return <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Background particles */}
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className={`particle ${particle.type} ${particle.animation}`}
-          style={{
-            left: particle.left,
-            top: particle.top,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`
-          }}
-        />
-      ))}
+      {particles.map(particle => <div key={particle.id} className={`particle ${particle.type} ${particle.animation}`} style={{
+      left: particle.left,
+      top: particle.top,
+      width: `${particle.size}px`,
+      height: `${particle.size}px`
+    }} />)}
 
       {/* Header */}
       <header className="bg-background border-b border-border/30 z-10">
@@ -84,70 +84,37 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </h2>
                   </div>
                   <nav className="flex flex-col space-y-4 mt-8 flex-grow">
-                    {navigationItems.map((item) => (
-                      <Button
-                        key={item.path}
-                        variant={isActive(item.path) ? "secondary" : "ghost"}
-                        className={cn(
-                          "justify-start",
-                          isActive(item.path) && "bg-secondary/20 font-medium"
-                        )}
-                        onClick={() => navigate(item.path)}
-                      >
+                    {navigationItems.map(item => <Button key={item.path} variant={isActive(item.path) ? "secondary" : "ghost"} className={cn("justify-start", isActive(item.path) && "bg-secondary/20 font-medium")} onClick={() => navigate(item.path)}>
                         <item.icon className="mr-2 h-5 w-5" />
                         {item.name}
-                      </Button>
-                    ))}
+                      </Button>)}
                   </nav>
                   
-                  {user && (
-                    <div className="mt-auto border-t border-border pt-4">
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-destructive"
-                        onClick={handleLogout}
-                      >
+                  {user && <div className="mt-auto border-t border-border pt-4">
+                      <Button variant="ghost" className="w-full justify-start text-destructive" onClick={handleLogout}>
                         Log Out
                       </Button>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </SheetContent>
             </Sheet>
-            <h1 
-              className="text-xl font-bold cursor-pointer logo-gradient" 
-              onClick={() => navigate('/')}
-            >
+            <h1 className="text-xl font-bold cursor-pointer logo-gradient" onClick={() => navigate('/')}>
               Campus Connect
             </h1>
           </div>
           
           <div className="hidden lg:flex items-center space-x-6">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.path}
-                variant="ghost"
-                className={cn(
-                  "text-foreground hover:text-white hover:bg-muted", 
-                  isActive(item.path) && "font-bold border-b-2 border-secondary rounded-none"
-                )}
-                onClick={() => navigate(item.path)}
-              >
+            {navigationItems.map(item => <Button key={item.path} variant="ghost" className={cn("text-foreground hover:text-white hover:bg-muted", isActive(item.path) && "font-bold border-b-2 border-secondary rounded-none")} onClick={() => navigate(item.path)}>
                 {item.name}
-              </Button>
-            ))}
+              </Button>)}
           </div>
           
           <div className="flex items-center space-x-2">
             {user && <NotificationDropdown />}
             
-            {user ? (
-              <DropdownMenu>
+            {user ? <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    className="rounded-full bg-muted text-foreground hover:bg-muted/60 h-10 px-4 flex items-center gap-2"
-                  >
+                  <Button variant="ghost" className="rounded-full bg-muted text-foreground hover:bg-muted/60 h-10 px-4 flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center">
                       <span className="text-xs font-bold">
                         {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : user.email?.substring(0, 2).toUpperCase() || "U"}
@@ -165,16 +132,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     Log Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button 
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate('/login')}
-              >
+              </DropdownMenu> : <Button variant="secondary" size="sm" onClick={() => navigate('/login')}>
                 Log In
-              </Button>
-            )}
+              </Button>}
           </div>
         </div>
       </header>
@@ -203,7 +163,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Contact</h3>
               <p className="text-muted-foreground">support@campusconnect.edu</p>
-              <p className="text-muted-foreground">123-456-7890</p>
+              <p className="text-muted-foreground">999-846-1268</p>
             </div>
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
@@ -211,8 +171,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Layout;
