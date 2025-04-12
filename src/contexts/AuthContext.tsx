@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,14 +30,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // We use setTimeout to prevent potential auth deadlocks
           setTimeout(() => {
             fetchUserProfile(session.user.id);
           }, 0);
@@ -48,7 +45,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -166,11 +162,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Implementation of isAdmin - for simplicity, we'll check if the email ends with '@admin.com'
-  // In a real application, you would check against a role in your user table
   const isAdmin = () => {
     if (!user || !user.email) return false;
-    return user.email.endsWith('@admin.com');
+    return user.email === 'amriteshyadav@admin.com' || user.email.endsWith('@admin.com');
   };
 
   const value = {

@@ -48,7 +48,7 @@ const AdminLoginPage = () => {
   const form = useForm<AdminLoginFormValues>({
     resolver: zodResolver(adminLoginFormSchema),
     defaultValues: {
-      email: '',
+      email: 'amriteshyadav@admin.com', // Pre-fill the admin email
       password: '',
     },
   });
@@ -60,20 +60,27 @@ const AdminLoginPage = () => {
     try {
       await signInWithPassword(values.email, values.password);
       
-      // We don't need to show success toast or redirect here as the useEffect will handle it
-      // if the user is an admin
-      
-      // Check if logged in user is admin after a small delay to let auth state update
+      // Add a small delay to allow the auth state to update
       setTimeout(() => {
-        if (user && !isAdmin()) {
-          setLoginError("Access denied. Your account does not have admin privileges.");
-          toast({
-            title: "Access denied",
-            description: "Your account does not have admin privileges.",
-            variant: "destructive",
-          });
+        // Check if user is now logged in
+        if (user) {
+          // Check if the logged-in user is an admin
+          if (isAdmin()) {
+            toast({
+              title: "Admin login successful",
+              description: "Redirecting to admin dashboard.",
+            });
+            navigate('/admin-events');
+          } else {
+            setLoginError("Access denied. Your account does not have admin privileges.");
+            toast({
+              title: "Access denied",
+              description: "Your account does not have admin privileges.",
+              variant: "destructive",
+            });
+          }
         }
-      }, 500);
+      }, 1000);
     } catch (error: any) {
       // Error is already handled in signInWithPassword
     } finally {
@@ -97,7 +104,7 @@ const AdminLoginPage = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Admin Authentication</CardTitle>
           <CardDescription className="text-center">
-            Please enter your admin credentials to continue
+            Use email: amriteshyadav@admin.com
           </CardDescription>
         </CardHeader>
         
@@ -122,7 +129,7 @@ const AdminLoginPage = () => {
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input 
-                          placeholder="admin@admin.com" 
+                          placeholder="amriteshyadav@admin.com" 
                           className="pl-10"
                           {...field} 
                         />
@@ -144,7 +151,7 @@ const AdminLoginPage = () => {
                         <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input 
                           type="password" 
-                          placeholder="••••••••" 
+                          placeholder="amritesh" 
                           className="pl-10"
                           {...field} 
                         />
