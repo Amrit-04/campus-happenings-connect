@@ -109,7 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, fullName?: string) => {
     setLoading(true);
     try {
-      // Sign up the user with Supabase Auth
+      // Sign up the user with Supabase Auth WITH AUTO CONFIRMATION (no email verification)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -117,7 +117,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data: {
             full_name: fullName || email.split('@')[0]
           },
-          emailRedirectTo: `${window.location.origin}/login`
         }
       });
       
@@ -144,16 +143,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (profileError) {
           console.error("Error creating profile:", profileError);
+          toast({
+            title: "Profile Creation Issue",
+            description: "Your account was created but we couldn't set up your profile.",
+            variant: "destructive",
+          });
         }
 
-        toast({
-          title: "Signup Successful",
-          description: "Your account has been created successfully. You can now login.",
+        // Auto sign in the user right after signup
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
+
+        if (signInError) {
+          console.error("Auto sign-in error:", signInError);
+          toast({
+            title: "Signup Successful",
+            description: "Your account has been created. You can now login with your credentials.",
+          });
+        } else {
+          toast({
+            title: "Signup Successful",
+            description: "Your account has been created and you're now logged in.",
+          });
+        }
       } else {
         toast({
           title: "Signup Successful",
-          description: "Please check your email to confirm your account.",
+          description: "Your account has been created. You can now login with your credentials.",
         });
       }
     } catch (error: any) {
