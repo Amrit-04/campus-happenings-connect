@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +16,7 @@ type AuthContextType = {
   session: Session | null;
   loading: boolean;
   signInWithPassword: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: () => boolean;
 };
@@ -99,41 +100,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, fullName?: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      // Sign up the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: fullName || email.split('@')[0]
+          },
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
       
-      if (error) {
+      if (authError) {
         toast({
           title: "Signup Failed",
-          description: error.message || "Unable to create account.",
+          description: authError.message || "Unable to create account.",
           variant: "destructive",
         });
-        throw error;
+        throw authError;
       }
       
-      toast({
-        title: "Signup Successful",
-        description: "Please check your email to confirm your account.",
-      });
+      // Check if the user was created successfully
+      if (authData.user) {
+        // Ensure the profile is created with the full name
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: authData.user.id,
+            full_name: fullName || email.split('@')[0],
+            avatar_url: null,
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+        }
+
+        toast({
+          title: "Signup Successful",
+          description: "Your account has been created successfully. You can now login.",
+        });
+      } else {
+        toast({
+          title: "Signup Successful",
+          description: "Please check your email to confirm your account.",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Signup Error",
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -164,7 +193,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAdmin = () => {
     if (!user || !user.email) return false;
-    return user.email === 'amriteshyadav@admin.com' || user.email.endsWith('@admin.com');
+    
+    // Explicitly check for the specific admin email
+    if (user.email === 'amriteshyadav@admin.com') return true;
+    
+    // Also allow any email with @admin.com domain
+    return user.email.endsWith('@admin.com');
   };
 
   const value = {

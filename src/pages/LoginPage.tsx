@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { LogIn, User, Mail, Lock, ArrowRight } from 'lucide-react';
+import { LogIn, User, Mail, Lock, ArrowRight, UserCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +31,9 @@ const loginFormSchema = z.object({
 });
 
 const signupFormSchema = z.object({
+  fullName: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
@@ -72,6 +76,7 @@ const LoginPage = () => {
   const signupForm = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
+      fullName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -87,12 +92,6 @@ const LoginPage = () => {
       // Success login - no toast message, just redirect in the useEffect
     } catch (error: any) {
       setLoginError("Login unsuccessful. Please check your credentials and try again.");
-      
-      toast({
-        title: "Login failed",
-        description: error.message || "Invalid email or password.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -102,20 +101,19 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      await signUp(values.email, values.password);
-      
-      toast({
-        title: "Signup successful",
-        description: "Please check your email to verify your account.",
-      });
-      
+      await signUp(values.email, values.password, values.fullName);
       setActiveTab('login');
-    } catch (error: any) {
+      signupForm.reset();
+      
+      // Pre-fill the login form with the email they just registered with
+      loginForm.setValue('email', values.email);
+      
       toast({
-        title: "Signup failed",
-        description: error.message || "Failed to create account.",
-        variant: "destructive",
+        title: "Registration successful",
+        description: "You can now login with your credentials.",
       });
+    } catch (error) {
+      // Error is already handled in signUp function
     } finally {
       setIsLoading(false);
     }
@@ -227,6 +225,27 @@ const LoginPage = () => {
             <TabsContent value="signup">
               <Form {...signupForm}>
                 <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-4">
+                  <FormField
+                    control={signupForm.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <UserCircle className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="John Doe" 
+                              className="pl-10"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
                   <FormField
                     control={signupForm.control}
                     name="email"
