@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,27 +41,36 @@ const AdminEventsPage = () => {
       try {
         setLoading(true);
         
-        // For this example, we'll use the mock data for events since it's what the app is currently using
+        // Get mock events data since that's what we're currently using
         const { getAllEvents } = await import('@/services/mockData');
         const allEvents = getAllEvents();
         
-        // Now fetch registration counts for each event from our actual database
-        const eventPromises = allEvents.map(async (event) => {
-          const { count, error } = await supabase
-            .from('event_registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', event.id);
-            
-          if (error) {
-            console.error('Error fetching registration count:', error);
-            return { ...event, registrationCount: 0 };
-          }
-          
-          return { ...event, registrationCount: count || 0 };
-        });
+        // Fetch registration counts for each event using Promise.all for better performance
+        const eventsWithRegistrations = await Promise.all(
+          allEvents.map(async (event) => {
+            try {
+              const { count, error } = await supabase
+                .from('event_registrations')
+                .select('*', { count: 'exact' })
+                .eq('event_id', event.id);
+              
+              if (error) throw error;
+              
+              return {
+                ...event,
+                registrationCount: count || 0
+              };
+            } catch (error) {
+              console.error(`Error fetching registrations for event ${event.id}:`, error);
+              return {
+                ...event,
+                registrationCount: 0
+              };
+            }
+          })
+        );
         
-        const eventsWithCounts = await Promise.all(eventPromises);
-        setEvents(eventsWithCounts);
+        setEvents(eventsWithRegistrations);
       } catch (error) {
         console.error('Error fetching events data:', error);
         toast({
