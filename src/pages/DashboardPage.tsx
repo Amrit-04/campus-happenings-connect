@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -14,22 +14,69 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Users, Bell, LayoutDashboard } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  getAllEvents, 
-  getRegistrationsByUser,
+  getAllEvents,
   getEventById
 } from '@/services/mockData';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Event } from '@/types/Event';
+import { useToast } from '@/hooks/use-toast';
 
 const DashboardPage = () => {
   const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) {
       navigate('/login');
+      return;
     }
-  }, [user, navigate]);
+    
+    const fetchUserRegistrations = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch registrations directly from Supabase
+        const { data: registrations, error } = await supabase
+          .from('event_registrations')
+          .select('event_id')
+          .eq('user_id', user.id);
+        
+        if (error) {
+          console.error('Error fetching registrations:', error);
+          toast({
+            title: "Error loading registrations",
+            description: "There was a problem loading your registered events.",
+            variant: "destructive",
+          });
+          setRegisteredEvents([]);
+          return;
+        }
+        
+        // Get the event details for each registration
+        if (registrations && registrations.length > 0) {
+          const events = registrations.map(reg => {
+            const event = getEventById(reg.event_id);
+            return event;
+          }).filter(Boolean) as Event[];
+          
+          setRegisteredEvents(events);
+        } else {
+          setRegisteredEvents([]);
+        }
+      } catch (error) {
+        console.error('Error in fetchUserRegistrations:', error);
+        setRegisteredEvents([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserRegistrations();
+  }, [user, navigate, toast]);
   
   const events = getAllEvents();
   const upcomingEvents = events
@@ -37,15 +84,6 @@ const DashboardPage = () => {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
     
-  const userRegistrations = user ? getRegistrationsByUser(user.id) : [];
-  const registeredEvents = userRegistrations
-    .map(registration => {
-      const event = getEventById(registration.eventId);
-      return event;
-    })
-    .filter(event => event !== null)
-    .sort((a, b) => new Date(a!.date).getTime() - new Date(b!.date).getTime());
-
   if (!user) {
     return null;
   }
@@ -69,7 +107,7 @@ const DashboardPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{userRegistrations.length}</div>
+              <div className="text-2xl font-bold">{registeredEvents.length}</div>
               <p className="text-xs text-muted-foreground">
                 Events you've registered for
               </p>
@@ -114,7 +152,15 @@ const DashboardPage = () => {
           </TabsList>
           
           <TabsContent value="registered" className="space-y-4">
-            {registeredEvents.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-10">
+                <div className="animate-pulse flex flex-col items-center">
+                  <div className="h-10 w-10 bg-slate-200 rounded-full mb-4"></div>
+                  <div className="h-4 w-48 bg-slate-200 rounded mb-2"></div>
+                  <div className="h-4 w-32 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+            ) : registeredEvents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {registeredEvents.map(event => event && (
                   <Card key={event.id} className="overflow-hidden">
